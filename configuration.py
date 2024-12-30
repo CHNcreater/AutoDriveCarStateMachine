@@ -10,5 +10,5 @@ class Configuration():
         return self.config.get(section, key)
     
 #Example
-config = Configuration()
-print(config.get("camera", "server_url"))
+# config = Configuration()
+# print(config.get("camera", "server_url"))

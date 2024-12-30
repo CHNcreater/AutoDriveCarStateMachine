@@ -12,3 +12,7 @@ qos = 1
 server_url = http://192.168.43.192/capture
 width = 640
 height = 480
+
+[ocr]
+ALIBABA_CLOUD_ACCESS_KEY_ID = 
+ALIBABA_CLOUD_ACCESS_KEY_SECRET = 
