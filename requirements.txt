@@ -11,6 +11,7 @@ alibabacloud_tea_openapi==0.3.12
 alibabacloud_tea_util==0.3.13
 alibabacloud_tea_xml==0.0.2
 attrs==24.3.0
+beautifulsoup4==4.12.3
 certifi==2024.12.14
 cffi==1.17.1
 charset-normalizer==3.4.1
@@ -28,6 +29,7 @@ numpy==2.2.1
 opencv-python==4.10.0.84
 packaging==24.2
 paho-mqtt==2.1.0
+pandas==2.2.3
 pillow==11.0.0
 propcache==0.2.1
 pycparser==2.22
@@ -36,7 +38,10 @@ PyQt6==6.8.0
 PyQt6-Qt6==6.8.1
 PyQt6_sip==13.9.1
 python-dateutil==2.9.0.post0
+pytz==2024.2
 requests==2.32.3
 six==1.17.0
+soupsieve==2.6
+tzdata==2024.2
 urllib3==2.3.0
 yarl==1.18.3

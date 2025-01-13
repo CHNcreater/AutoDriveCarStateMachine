@@ -2,14 +2,17 @@ class BaseState():
     def __init__(self, state_machine):
         self.state_machine = state_machine
 
-    def on_enter(self):
+    def move_forward(self):
         pass
 
-    def on_exit(self):
+    def turn_direction(self):
         pass
 
-    def update(self, dt):
+    def u_turn(self):
         pass
 
-    def handle_event(self, event):
+    def input_target(self):
+        pass
+
+    def auto_drive(self):
         pass

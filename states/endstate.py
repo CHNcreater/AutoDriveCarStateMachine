@@ -1,6 +1,6 @@
 from states.basestate import BaseState
 
-class CatchingState(BaseState):
+class EndState(BaseState):
     def __init__(self):
         super().__init__()
 
