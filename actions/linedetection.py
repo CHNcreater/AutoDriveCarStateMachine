@@ -21,19 +21,13 @@ def region_selection(image):
 		ignore_mask_color = 255
 	# creating a polygon to focus only on the road in the picture
 	# we have created this polygon in accordance to how the camera was placed
-	rows, cols = image.shape[:2]
-	bottom_left = [cols * 0.1, rows * 0.95]
-	top_left	 = [cols * 0.4, rows * 0.6]
-	bottom_right = [cols * 0.9, rows * 0.95]
-	top_right = [cols * 0.6, rows * 0.6]
-	vertices = np.array([[bottom_left, top_left, top_right, bottom_right]], dtype=np.int32)
+	height, width = image.shape
+    # 定义感兴趣区域的多边形顶点
+	polygon = np.array([[(0, height),(width, height),(width, height * 0.4),(0, height * 0.4)]], np.int32)
 	# filling the polygon with white color and generating the final mask
-	cv2.fillPoly(mask, vertices, ignore_mask_color)
+	cv2.fillPoly(mask, polygon, ignore_mask_color)
 	# performing Bitwise AND on the input image and mask to get only the edges on the road
 	masked_image = cv2.bitwise_and(image, mask)
-	cv2.imshow('Region of Interest', masked_image)
-	cv2.waitKey(0)
-	cv2.destroyAllWindows()
 	return masked_image
 
 def hough_transform(image):
@@ -49,9 +43,9 @@ def hough_transform(image):
 	# Only lines that are greater than threshold will be returned.
 	threshold = 20	
 	# Line segments shorter than that are rejected.
-	minLineLength = 20
+	minLineLength = 50
 	# Maximum allowed gap between points on the same line to link them
-	maxLineGap = 500	
+	maxLineGap = 100	
 	# function returns an array containing dimensions of straight lines 
 	# appearing in the input image
 	return cv2.HoughLinesP(image, rho = rho, theta = theta, threshold = threshold,
@@ -116,11 +110,10 @@ def lane_lines(image, lines):
 	"""
 	left_lane, right_lane = average_slope_intercept(lines)
 	y1 = image.shape[0]
-	y2 = y1 * 0.6
+	y2 = y1 * 0.4
 	left_line = pixel_points(y1, y2, left_lane)
 	right_line = pixel_points(y1, y2, right_lane)
 	return left_line, right_line
-
 	
 def draw_lane_lines(image, lines, color=[255, 0, 0], thickness=12):
 	"""
@@ -136,6 +129,61 @@ def draw_lane_lines(image, lines, color=[255, 0, 0], thickness=12):
 		if line is not None:
 			cv2.line(line_image, *line, color, thickness)
 	return cv2.addWeighted(image, 1.0, line_image, 1.0, 0.0)
+
+def calculate_steering_angle(frame, lines):
+    height, width, _ = frame.shape
+    if lines is not None:
+        # 将所有车道线的斜率和截距分开存储
+        left_slopes, left_intercepts, right_slopes, right_intercepts = [], [], [], []
+        for line in lines:
+            x1, y1, x2, y2 = line[0]
+            slope = (y2 - y1) / (x2 - x1)
+            intercept = y1 - slope * x1
+            if slope < 0:  # 左车道线
+                left_slopes.append(slope)
+                left_intercepts.append(intercept)
+            else:  # 右车道线
+                right_slopes.append(slope)
+                right_intercepts.append(intercept)
+        # 计算平均斜率和截距
+        if left_slopes and left_intercepts:
+            left_slope = np.mean(left_slopes)
+            left_intercept = np.mean(left_intercepts)
+            # 计算左车道线在图像底部的点
+            left_y1 = height
+            left_x1 = int((left_y1 - left_intercept) / left_slope)
+            left_y2 = int(height / 2)
+            left_x2 = int((left_y2 - left_intercept) / left_slope)
+        else:
+            left_x1, left_y1, left_x2, left_y2 = None, None, None, None
+        if right_slopes and right_intercepts:
+            right_slope = np.mean(right_slopes)
+            right_intercept = np.mean(right_intercepts)
+            # 计算右车道线在图像底部的点
+            right_y1 = height
+            right_x1 = int((right_y1 - right_intercept) / right_slope)
+            right_y2 = int(height / 2)
+            right_x2 = int((right_y2 - right_intercept) / right_slope)
+        else:
+            right_x1, right_y1, right_x2, right_y2 = None, None, None, None
+        # 计算车道中心线
+        if left_x1 and right_x1:
+            mid_x = (left_x1 + right_x1) // 2
+            mid_y = height
+            # 计算转向角度
+            steering_angle = np.arctan2(height - mid_y, mid_x - width // 2) * 180 / np.pi
+            return steering_angle
+    return 0  # 如果未检测到车道线，返回默认角度
+
+def detect_and_handle_corner(steering_angle, previous_angle):
+    # 如果转向角度变化较大，可能是遇到了直角弯
+    if abs(steering_angle - previous_angle) > 30:
+        # 调整转向角度以应对直角弯
+        if steering_angle > previous_angle:
+            steering_angle = previous_angle + 90
+        else:
+            steering_angle = previous_angle - 90
+    return steering_angle
 
 def frame_processor(image):
 	"""
@@ -156,7 +204,6 @@ def frame_processor(image):
 	low_t = 50
 	# second threshold for the hysteresis procedure 
 	high_t = 150
-	cv2.imshow('Blurred Image', blur)
 	# applying canny edge detection and save edges in a variable
 	edges = cv2.Canny(blur, low_t, high_t)
 	# since we are getting too many edges from our image, we apply 
@@ -166,30 +213,11 @@ def frame_processor(image):
 	# Applying hough transform to get straight lines from our image 
 	# and find the lane lines
 	# Will explain Hough Transform in detail in further steps
+	cv2.imshow('Region', region)
 	hough = hough_transform(region)
 	#lastly we draw the lines on our resulting frame and return it as output 
 	result = draw_lane_lines(image, lane_lines(image, hough))
 	return result
-
-# # driver function
-# def process_video(test_video, output_video):
-# 	"""
-# 	Read input video stream and produce a video file with detected lane lines.
-# 	Parameters:
-# 		test_video: location of input video file
-# 		output_video: location where output video file is to be saved
-# 	"""
-# 	# read the video file using VideoFileClip without audio
-# 	input_video = editor.VideoFileClip(test_video, audio=False)
-# 	# apply the function "frame_processor" to each frame of the video
-# 	# will give more detail about "frame_processor" in further steps
-# 	# "processed" stores the output video
-# 	processed = input_video.fl_image(frame_processor)
-# 	# save the output video stream to an mp4 file
-# 	processed.write_videofile(output_video, audio=False)
-	
-# calling driver function
-# process_video('input.mp4','output.mp4')
 
 if __name__ == '__main__':
 	image_path = '../data/lines/line01.jpg' # path to the image
@@ -202,5 +230,3 @@ if __name__ == '__main__':
 		cv2.destroyAllWindows()
 	else:
 		print("Error: Unable to read the image.")
-	result = frame_processor(image=image)
-	cv2.imshow('Processed Image', result)
