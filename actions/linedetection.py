@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import cv2
+import sys
 
 def region_selection(image):
 	"""
@@ -23,7 +24,7 @@ def region_selection(image):
 	# we have created this polygon in accordance to how the camera was placed
 	height, width = image.shape
     # 定义感兴趣区域的多边形顶点
-	polygon = np.array([[(0, height),(width, height),(width, height * 0.4),(0, height * 0.4)]], np.int32)
+	polygon = np.array([[(0, height),(width, height),(width, height * 0.5),(0, height * 0.5)]], np.int32)
 	# filling the polygon with white color and generating the final mask
 	cv2.fillPoly(mask, polygon, ignore_mask_color)
 	# performing Bitwise AND on the input image and mask to get only the edges on the road
@@ -41,7 +42,7 @@ def hough_transform(image):
 	# Angle resolution of the accumulator in radians.
 	theta = np.pi/180
 	# Only lines that are greater than threshold will be returned.
-	threshold = 20	
+	threshold = 50
 	# Line segments shorter than that are rejected.
 	minLineLength = 50
 	# Maximum allowed gap between points on the same line to link them
@@ -110,7 +111,7 @@ def lane_lines(image, lines):
 	"""
 	left_lane, right_lane = average_slope_intercept(lines)
 	y1 = image.shape[0]
-	y2 = y1 * 0.4
+	y2 = y1 * 0.5
 	left_line = pixel_points(y1, y2, left_lane)
 	right_line = pixel_points(y1, y2, right_lane)
 	return left_line, right_line
@@ -200,12 +201,18 @@ def frame_processor(image):
 	kernel_size = 5
 	# Applying gaussian blur to remove noise from the frames
 	blur = cv2.GaussianBlur(grayscale, (kernel_size, kernel_size), 0)
+	# 应用直方图均衡化
+	equalized = cv2.equalizeHist(blur)
+	cv2.imshow('Equalized', equalized)
+	# 应用双边滤波
+	filtered = cv2.bilateralFilter(equalized, 9, 75, 75)
+	cv2.imshow('Filtered', filtered)
 	# first threshold for the hysteresis procedure
-	low_t = 50
+	low_t = 200
 	# second threshold for the hysteresis procedure 
-	high_t = 150
+	high_t = 255
 	# applying canny edge detection and save edges in a variable
-	edges = cv2.Canny(blur, low_t, high_t)
+	edges = cv2.Canny(filtered, low_t, high_t)
 	# since we are getting too many edges from our image, we apply 
 	# a mask polygon to only focus on the road
 	# Will explain Region selection in detail in further steps
@@ -220,7 +227,11 @@ def frame_processor(image):
 	return result
 
 if __name__ == '__main__':
-	image_path = '../data/lines/line01.jpg' # path to the image
+	if len(sys.argv) != 2:
+		print("Usage: python linedetection.py <image_path>")
+		sys.exit(1)
+
+	image_path = f'../data/lines/{sys.argv[1]}.jpg' # path to the image
 	image = cv2.imread(image_path)
 	cv2.imshow('Original Image', image)
 	if image is not None:
