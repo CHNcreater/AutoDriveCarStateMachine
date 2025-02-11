@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import cv2
 import sys
+import math
 
 def region_selection(image):
 	"""
@@ -114,7 +115,8 @@ def lane_lines(image, lines):
 	y2 = y1 * 0.5
 	left_line = pixel_points(y1, y2, left_lane)
 	right_line = pixel_points(y1, y2, right_lane)
-	return left_line, right_line
+	center_line = (((left_line[0][0] + right_line[0][0]) // 2, (left_line[0][1] + right_line[0][1]) // 2), ((left_line[1][0] + right_line[1][0]) // 2, (left_line[1][1] + right_line[1][1]) // 2))
+	return left_line, right_line, center_line
 	
 def draw_lane_lines(image, lines, color=[255, 0, 0], thickness=12):
 	"""
@@ -133,48 +135,25 @@ def draw_lane_lines(image, lines, color=[255, 0, 0], thickness=12):
 
 def calculate_steering_angle(frame, lines):
     height, width, _ = frame.shape
-    if lines is not None:
-        # 将所有车道线的斜率和截距分开存储
-        left_slopes, left_intercepts, right_slopes, right_intercepts = [], [], [], []
-        for line in lines:
-            x1, y1, x2, y2 = line[0]
-            slope = (y2 - y1) / (x2 - x1)
-            intercept = y1 - slope * x1
-            if slope < 0:  # 左车道线
-                left_slopes.append(slope)
-                left_intercepts.append(intercept)
-            else:  # 右车道线
-                right_slopes.append(slope)
-                right_intercepts.append(intercept)
-        # 计算平均斜率和截距
-        if left_slopes and left_intercepts:
-            left_slope = np.mean(left_slopes)
-            left_intercept = np.mean(left_intercepts)
-            # 计算左车道线在图像底部的点
-            left_y1 = height
-            left_x1 = int((left_y1 - left_intercept) / left_slope)
-            left_y2 = int(height / 2)
-            left_x2 = int((left_y2 - left_intercept) / left_slope)
+    _, _, center_line = lane_lines(frame, lines)
+    x1, y1 = center_line[0]
+    x2, y2 = center_line[1]
+	# calculating slope of a line
+    slope = (y2 - y1) / (x2 - x1)
+	# calculating intercept of a line
+    intercept = y1 - (slope * x1)
+    mid_y = slope * (width / 2) + intercept
+    # 计算车道中心线
+    mid_x = x1
+	# 计算转向角度
+    steering_angle = np.arctan2(height - mid_y, width / 2 - mid_x) * 180 / np.pi
+    if abs(steering_angle - 90 < 5):
+        return 0
+    else:
+        if slope < 0:
+            return abs(steering_angle - 90)
         else:
-            left_x1, left_y1, left_x2, left_y2 = None, None, None, None
-        if right_slopes and right_intercepts:
-            right_slope = np.mean(right_slopes)
-            right_intercept = np.mean(right_intercepts)
-            # 计算右车道线在图像底部的点
-            right_y1 = height
-            right_x1 = int((right_y1 - right_intercept) / right_slope)
-            right_y2 = int(height / 2)
-            right_x2 = int((right_y2 - right_intercept) / right_slope)
-        else:
-            right_x1, right_y1, right_x2, right_y2 = None, None, None, None
-        # 计算车道中心线
-        if left_x1 and right_x1:
-            mid_x = (left_x1 + right_x1) // 2
-            mid_y = height
-            # 计算转向角度
-            steering_angle = np.arctan2(height - mid_y, mid_x - width // 2) * 180 / np.pi
-            return steering_angle
-    return 0  # 如果未检测到车道线，返回默认角度
+            return -1 * abs(steering_angle - 90)
 
 def detect_and_handle_corner(steering_angle, previous_angle):
     # 如果转向角度变化较大，可能是遇到了直角弯
@@ -186,7 +165,7 @@ def detect_and_handle_corner(steering_angle, previous_angle):
             steering_angle = previous_angle - 90
     return steering_angle
 
-def frame_processor(image):
+def frame_processor_test(image):
 	"""
 	Process the input frame to detect lane lines.
 	Parameters:
@@ -201,18 +180,12 @@ def frame_processor(image):
 	kernel_size = 5
 	# Applying gaussian blur to remove noise from the frames
 	blur = cv2.GaussianBlur(grayscale, (kernel_size, kernel_size), 0)
-	# 应用直方图均衡化
-	equalized = cv2.equalizeHist(blur)
-	cv2.imshow('Equalized', equalized)
-	# 应用双边滤波
-	filtered = cv2.bilateralFilter(equalized, 9, 75, 75)
-	cv2.imshow('Filtered', filtered)
 	# first threshold for the hysteresis procedure
 	low_t = 200
 	# second threshold for the hysteresis procedure 
 	high_t = 255
 	# applying canny edge detection and save edges in a variable
-	edges = cv2.Canny(filtered, low_t, high_t)
+	edges = cv2.Canny(blur, low_t, high_t)
 	# since we are getting too many edges from our image, we apply 
 	# a mask polygon to only focus on the road
 	# Will explain Region selection in detail in further steps
@@ -220,11 +193,23 @@ def frame_processor(image):
 	# Applying hough transform to get straight lines from our image 
 	# and find the lane lines
 	# Will explain Hough Transform in detail in further steps
-	cv2.imshow('Region', region)
 	hough = hough_transform(region)
+	steering_angle = calculate_steering_angle(image, hough)
+	print("Steering Angle: ", steering_angle)
 	#lastly we draw the lines on our resulting frame and return it as output 
 	result = draw_lane_lines(image, lane_lines(image, hough))
 	return result
+
+def line_detection(image):
+    """
+    return turning angle, if positve, turn right, else turn left by a specific angle
+    """
+    grayscale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    blur = cv2.GaussianBlur(grayscale, (5, 5), 0)
+    edges = cv2.Canny(blur, 200, 255)
+    region = region_selection(edges)
+    hough = hough_transform(region)
+    return calculate_steering_angle(image, hough)
 
 if __name__ == '__main__':
 	if len(sys.argv) != 2:
@@ -233,9 +218,8 @@ if __name__ == '__main__':
 
 	image_path = f'../data/lines/{sys.argv[1]}.jpg' # path to the image
 	image = cv2.imread(image_path)
-	cv2.imshow('Original Image', image)
 	if image is not None:
-		processed_image = frame_processor(image)
+		processed_image = frame_processor_test(image)
 		cv2.imshow('Processed Image', processed_image)
 		cv2.waitKey(0)
 		cv2.destroyAllWindows()
