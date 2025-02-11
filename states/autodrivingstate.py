@@ -1,6 +1,6 @@
 from states.basestate import BaseState
 from states.catchingstate import CatchingState
-from actions.drivecar import drive_car
+from actions.drivecar import navigate_on_autopilot
 
 class AutoDrivingState(BaseState):
     def __init__(self):
@@ -21,5 +21,5 @@ class AutoDrivingState(BaseState):
     def auto_drive(self):
         isArrived = False
         while not isArrived:
-            isArrived = drive_car()
+            isArrived = navigate_on_autopilot()
         self.state_machine.change_state(CatchingState(self.state_machine))

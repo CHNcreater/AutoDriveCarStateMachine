@@ -1,10 +1,23 @@
 from objectdetectiontextrecognition import ObjectDetectionTextRecognition
+from ..dataprovider import CameraDataProvider
+from linedetection import line_detection
+from ..communication import MQTTClient
+
+def navigate_on_autopilot():
+    """navigate on autopilot
+    """
+    data_provider = CameraDataProvider()
+    image = data_provider.get_image()
+    steering_angle = line_detection(image)
+
+    
 
 def drive_car():
     """drive the car
     """
-    res = ObjectDetectionTextRecognition.main()
-    if res == "stop":
-        return False
-    else :
-        return True
+    # 1. auto drive the car to the bifurcation
+
+    # 2. detect the target mark
+    odt = ObjectDetectionTextRecognition()
+    image = odt.camera.get_image()
+    target = odt.main(image)
