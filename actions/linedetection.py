@@ -1,8 +1,6 @@
 import numpy as np
-import pandas as pd
 import cv2
 import sys
-import math
 
 def region_selection(image):
 	"""

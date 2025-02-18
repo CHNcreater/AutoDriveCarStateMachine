@@ -1,3 +1,5 @@
+import sys
+sys.path.append("..")
 from states.basestate import BaseState
 from states.catchingstate import CatchingState
 from actions.drivecar import navigate_on_autopilot

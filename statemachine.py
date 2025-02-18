@@ -5,14 +5,15 @@ class StateMachine():
     def __init__(self):
         self.states = {}
         self.transitions = {}
-        self.curState = StartState(self)
+        self.curState: BaseState = StartState(self)
         self.target1 = None #target mark, such as "A/B/C"
         self.target2 = None #target mark, such as "1/2/3"
+        self.ip_addr = None
 
     def change_state(self, state: BaseState):
         pass
 
-    def set_target(self, target1, target2):
+    def set_env(self, target1, target2, ip_addr):
         """set the target mark
 
         Args:
@@ -20,26 +21,20 @@ class StateMachine():
         """
         self.target1 = target1
         self.target2 = target2
+        self.ip_addr = ip_addr
 
-    def drive(self, args):
-        """send drive command to the car
-
-        Args:
-            args (_type_): _description_
-        """
-        pass
-
-    def run(self, target):
+    def start(self):
         """run the state machine
         """
-        self.target = target
-        change_state(StartState)
-        pass
-
-    def auto_drive(self):
-        """auto drive the car
-        """
         self.curState.auto_drive()
+
+def start(target1, target2, ip_addr):
+    stateMachine = StateMachine()
+    stateMachine.set_env(target1=target1, target2=target2, ip_addr=ip_addr)
+    stateMachine.start()
+
+if __name__ == '__main__':
+    start(1,2,3)
 
 #Example
 #state_machine = StateMachine()

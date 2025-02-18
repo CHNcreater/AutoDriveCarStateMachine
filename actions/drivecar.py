@@ -1,7 +1,9 @@
-from objectdetectiontextrecognition import ObjectDetectionTextRecognition
-from ..dataprovider import CameraDataProvider
-from linedetection import line_detection
-from ..communication import MQTTClient
+import sys
+sys.path.append("..")
+from .objectdetectiontextrecognition import ObjectDetectionTextRecognition
+from dataprovider.dp_camera import CameraDataProvider
+from .linedetection import line_detection
+from communication.mqtt_client import MQTTClient
 
 def navigate_on_autopilot():
     """navigate on autopilot
