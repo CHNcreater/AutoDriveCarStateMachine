@@ -34,5 +34,6 @@ class CameraDataProvider:
 
 
 # Example usage:
-# camera = CameraDataProvider()
-# camera.display_image()
+if __name__ == '__main__':
+    camera = CameraDataProvider()
+    camera.display_image()

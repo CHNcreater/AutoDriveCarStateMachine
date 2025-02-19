@@ -1,23 +1,19 @@
 import paho.mqtt.client as mqtt
 
-class MQTTClient:
-    def __init__(self, broker_address, port=1883, client_id=""):
-        self.broker_address = broker_address
-        self.port = port
-        self.client_id = client_id
-        self.client = mqtt.Client(client_id)
+def on_connect(client, userdata, flags, rc, properties=None):
+    print(f"Connected with result code {rc}")
+    client.subscribe("car/drive")
 
-    def connect(self):
-        self.client.connect(self.broker_address, self.port)
+def on_message(client, userdata, msg, properties=None):
+    print(f"Received message: {msg.payload.decode()} on topic {msg.topic}")
 
-    def publish(self, topic, message):
-        self.client.publish(topic, message)
+client = mqtt.Client()
+client.on_connect = on_connect
+client.on_message = on_message
 
-    def disconnect(self):
-        self.client.disconnect()
+broker_address = "192.168.43.240"
+port = 1883
 
-# Example usage:
-# mqtt_client = MQTTClient("broker.hivemq.com")
-# mqtt_client.connect()
-# mqtt_client.publish("test/topic", "Hello MQTT")
-# mqtt_client.disconnect()
+client.connect(broker_address, port, 60)
+client.publish('car/drive', "hello mqtt")
+client.disconnect()

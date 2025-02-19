@@ -1,4 +1,4 @@
-Start State auto drive is called, target1:A, target2:1, ip_addr:1234
+Start State auto drive is called, target1:a, target2:1, camera_ip_addr:123, mosquitto_ip_addr: 123
 Enter AutoDrivingState and Is performing auto-drive
 Enter CatchingState and Perform catching
 Start to returning back to start point

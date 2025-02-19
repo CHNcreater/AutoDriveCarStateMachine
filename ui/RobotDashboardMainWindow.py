@@ -201,8 +201,8 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "Target"))
         self.lineEdit.setPlaceholderText(_translate("MainWindow", "A/B/C"))
         self.lineEdit_2.setPlaceholderText(_translate("MainWindow", "1/2/3"))
-        self.label_2.setText(_translate("MainWindow", "Camera IP"))
-        self.lineEdit_3.setPlaceholderText(_translate("MainWindow", "192.168.0.0"))
+        self.label_2.setText(_translate("MainWindow", "Camera & Mosquitto IP"))
+        self.lineEdit_3.setPlaceholderText(_translate("MainWindow", "192.168.0.0;192.168.0.1"))
         self.pushButton.setText(_translate("MainWindow", "Start"))
         self.pushButton_2.setText(_translate("MainWindow", "Stop"))
         self.groupBox_2.setTitle(_translate("MainWindow", "Controller"))
@@ -214,17 +214,20 @@ class Ui_MainWindow(object):
     def onStartPushButtonPress(self):
         target_character = self.lineEdit.text().strip()
         target_number = self.lineEdit_2.text().strip()
-        target_ip_addr = self.lineEdit_3.text().strip()
+        target_camera_ip_addr, target_mosquitto_ip_addr = self.lineEdit_3.text().strip().split(";")
         if not target_character:
             print("Please input target character")
             return
         if not target_number:
             print("Please input target number")
             return
-        if not target_ip_addr:
-            print("Please input target ip address")
+        if not target_camera_ip_addr:
+            print("Please input target camera ip address")
             return
-        self.stateMachine.set_env(target1=target_character, target2=target_number, ip_addr=target_ip_addr)
+        if not target_mosquitto_ip_addr:
+            print("Please input target mosquitto ip address")
+            return
+        self.stateMachine.set_env(target1=target_character, target2=target_number, ip_addr=target_camera_ip_addr, ip_addr_mosquitto=target_mosquitto_ip_addr)
         self.stateMachine.start()
 
     def update_log(self, log_message: str):
