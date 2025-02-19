@@ -27,7 +27,7 @@ def preprocess_image_for_ocr(image_path):
     
 
 # Example usage
-binary_image =  preprocess_image_for_ocr('C:\\Users\\YQiao2\\Downloads\\A.jpg')
+# binary_image =  preprocess_image_for_ocr('C:\\Users\\YQiao2\\Downloads\\A.jpg')
 # cv2.imshow('Preprocessed Image', binary_image)
 # cv2.waitKey(0)  # Wait for a key press to close the window
 # cv2.destroyAllWindows()  # Close all OpenCV windows

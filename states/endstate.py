@@ -1,6 +1,9 @@
-class BaseState():
-    def __init__(self, state_machine):
-        self.state_machine = state_machine
+from states.basestate import BaseState
+
+class EndState(BaseState):
+    def __init__(self, stateMachine):
+        super().__init__(stateMachine)
+        self.state_machine.logger.log("Stop")
 
     def move_forward(self):
         pass
@@ -15,7 +18,4 @@ class BaseState():
         pass
 
     def auto_drive(self):
-        pass
-
-    def catching(self):
         pass

@@ -1,4 +1,3 @@
-import os
 import sys
 
 from RobotDashboardMainWindow import Ui_MainWindow

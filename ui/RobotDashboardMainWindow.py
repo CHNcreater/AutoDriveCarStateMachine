@@ -7,7 +7,9 @@
 
 
 from PyQt6 import QtCore, QtGui, QtWidgets
-
+import sys
+sys.path.append("..")
+from statemachine import StateMachine
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -184,6 +186,14 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+        self.stateMachine = StateMachine()
+        self.communicate = self.stateMachine.logger.communicate
+        self.events_binding()
+
+    def events_binding(self):
+        self.pushButton.clicked.connect(self.onStartPushButtonPress)
+        self.communicate.log_signal.connect(self.update_log)
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
@@ -193,15 +203,33 @@ class Ui_MainWindow(object):
         self.lineEdit_2.setPlaceholderText(_translate("MainWindow", "1/2/3"))
         self.label_2.setText(_translate("MainWindow", "Camera IP"))
         self.lineEdit_3.setPlaceholderText(_translate("MainWindow", "192.168.0.0"))
-        self.pushButton.setText(_translate("MainWindow", "PushButton"))
-        self.pushButton_2.setText(_translate("MainWindow", "PushButton"))
+        self.pushButton.setText(_translate("MainWindow", "Start"))
+        self.pushButton_2.setText(_translate("MainWindow", "Stop"))
         self.groupBox_2.setTitle(_translate("MainWindow", "Controller"))
         self.pushButton_5.setText(_translate("MainWindow", "Front"))
         self.pushButton_3.setText(_translate("MainWindow", "Left"))
         self.pushButton_4.setText(_translate("MainWindow", "Back"))
         self.pushButton_6.setText(_translate("MainWindow", "Right"))
 
+    def onStartPushButtonPress(self):
+        target_character = self.lineEdit.text().strip()
+        target_number = self.lineEdit_2.text().strip()
+        target_ip_addr = self.lineEdit_3.text().strip()
+        if not target_character:
+            print("Please input target character")
+            return
+        if not target_number:
+            print("Please input target number")
+            return
+        if not target_ip_addr:
+            print("Please input target ip address")
+            return
+        self.stateMachine.set_env(target1=target_character, target2=target_number, ip_addr=target_ip_addr)
+        self.stateMachine.start()
 
+    def update_log(self, log_message: str):
+        self.textBrowser.append(log_message)
+    
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)

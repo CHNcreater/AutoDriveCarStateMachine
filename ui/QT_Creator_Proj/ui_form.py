@@ -89,7 +89,8 @@ class Ui_MainWindow(object):
         self.verticalLayout_4 = QVBoxLayout(self.frame_2)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.pushButton = QPushButton(self.frame_2)
-        self.pushButton.setObjectName(u"pushButton")
+        self.pushButton.setObjectName(u"Start")
+        self.pushButton.clicked.connect(self.start_run)
 
         self.verticalLayout_4.addWidget(self.pushButton)
 
@@ -232,7 +233,7 @@ class Ui_MainWindow(object):
         self.lineEdit_2.setPlaceholderText(QCoreApplication.translate("MainWindow", u"1/2/3", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Camera IP", None))
         self.lineEdit_3.setPlaceholderText(QCoreApplication.translate("MainWindow", u"192.168.0.0", None))
-        self.pushButton.setText(QCoreApplication.translate("MainWindow", u"PushButton", None))
+        self.pushButton.setText(QCoreApplication.translate("MainWindow", u"Start", None))
         self.pushButton_2.setText(QCoreApplication.translate("MainWindow", u"PushButton", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("MainWindow", u"Controller", None))
         self.pushButton_5.setText(QCoreApplication.translate("MainWindow", u"Front", None))
@@ -240,4 +241,7 @@ class Ui_MainWindow(object):
         self.pushButton_4.setText(QCoreApplication.translate("MainWindow", u"Back", None))
         self.pushButton_6.setText(QCoreApplication.translate("MainWindow", u"Right", None))
     # retranslateUi
+
+    def start_run(self):
+        print("Start")
 
