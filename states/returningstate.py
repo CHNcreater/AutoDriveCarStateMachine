@@ -1,10 +1,10 @@
 import sys
 sys.path.append("..")
 from states.basestate import BaseState
-from states.catchingstate import CatchingState
+from states.endstate import EndState
 from actions.drivecar import navigate_on_autopilot
 
-class AutoDrivingState(BaseState):
+class ReturningState(BaseState):
     def __init__(self, stateMachine):
         super().__init__(stateMachine)
 
@@ -21,11 +21,10 @@ class AutoDrivingState(BaseState):
         pass
 
     def auto_drive(self):
-        self.state_machine.logger.log("Enter AutoDrivingState and Is performing auto-drive")
+        self.state_machine.logger.log("Enter ReturningState and complete task")
         isArrived = False
         i = 0
         while not isArrived and i < 5:
-            isArrived = navigate_on_autopilot()
+            # isArrived = navigate_on_autopilot()
             i += 1
-        self.state_machine.change_state(CatchingState(self.state_machine))
-        self.state_machine.curState.catching()
+        self.state_machine.change_state(EndState(self.state_machine))

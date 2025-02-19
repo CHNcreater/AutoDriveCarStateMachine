@@ -16,3 +16,6 @@ class BaseState():
 
     def auto_drive(self):
         pass
+
+    def catching(self):
+        pass

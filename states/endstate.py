@@ -1,8 +1,9 @@
 from states.basestate import BaseState
 
 class EndState(BaseState):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, stateMachine):
+        super().__init__(stateMachine)
+        self.state_machine.logger.log("Stop")
 
     def move_forward(self):
         pass

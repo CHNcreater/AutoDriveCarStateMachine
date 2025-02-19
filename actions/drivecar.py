@@ -8,6 +8,7 @@ from communication.mqtt_client import MQTTClient
 def navigate_on_autopilot():
     """navigate on autopilot
     """
+    return False
     data_provider = CameraDataProvider()
     image = data_provider.get_image()
     steering_angle = line_detection(image)

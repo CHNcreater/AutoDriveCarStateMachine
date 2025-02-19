@@ -6,4 +6,6 @@ class StartState(BaseState):
         super().__init__(state_machine=stateMachine)
 
     def auto_drive(self):
-        print("Start State auto drive is called")
+        self.state_machine.logger.log(f"Start State auto drive is called, target1:{self.state_machine.target1}, target2:{self.state_machine.target2}, ip_addr:{self.state_machine.ip_addr}")
+        self.state_machine.change_state(AutoDrivingState(self.state_machine))
+        self.state_machine.curState.auto_drive()
