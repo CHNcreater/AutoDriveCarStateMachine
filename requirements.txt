@@ -28,7 +28,7 @@ multidict==6.1.0
 numpy==2.2.1
 opencv-python==4.10.0.84
 packaging==24.2
-paho-mqtt==2.1.0
+paho-mqtt==1.6.1
 pandas==2.2.3
 pillow==11.0.0
 propcache==0.2.1
@@ -37,9 +37,13 @@ pyparsing==3.2.0
 PyQt6==6.8.0
 PyQt6-Qt6==6.8.1
 PyQt6_sip==13.9.1
+PySide6==6.8.1
+PySide6_Addons==6.8.1
+PySide6_Essentials==6.8.1
 python-dateutil==2.9.0.post0
 pytz==2024.2
 requests==2.32.3
+shiboken6==6.8.1
 six==1.17.0
 soupsieve==2.6
 tzdata==2024.2
