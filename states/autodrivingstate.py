@@ -25,7 +25,7 @@ class AutoDrivingState(BaseState):
         isArrived = False
         i = 0
         while not isArrived and i < 5:
-            isArrived = navigate_on_autopilot()
+            isArrived = navigate_on_autopilot(self.state_machine.ip_addr)
             i += 1
         self.state_machine.change_state(CatchingState(self.state_machine))
         self.state_machine.curState.catching()
