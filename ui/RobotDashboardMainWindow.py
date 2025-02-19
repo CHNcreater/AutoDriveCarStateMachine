@@ -157,6 +157,7 @@ class Ui_MainWindow(object):
         self.widget_2.setObjectName("widget_2")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.widget_2)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
+        
         self.graphicsView = QtWidgets.QGraphicsView(parent=self.widget_2)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -164,6 +165,14 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.graphicsView.sizePolicy().hasHeightForWidth())
         self.graphicsView.setSizePolicy(sizePolicy)
         self.graphicsView.setObjectName("graphicsView")
+        self.scene = QtWidgets.QGraphicsScene()
+        pixmap = QtGui.QPixmap()  # 替换为你的图片路径
+        pixmap.loadFromData()#add image input stream
+        pixmap_item = QtWidgets.QGraphicsPixmapItem(pixmap)
+        self.scene.addItem(pixmap_item)
+        # 将场景设置到 QGraphicsView
+        self.graphicsView.setScene(self.scene)
+        
         self.verticalLayout_2.addWidget(self.graphicsView)
         self.textBrowser = QtWidgets.QTextBrowser(parent=self.widget_2)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)

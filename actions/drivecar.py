@@ -3,7 +3,7 @@ sys.path.append("..")
 from .objectdetectiontextrecognition import ObjectDetectionTextRecognition
 from dataprovider.dp_camera import CameraDataProvider
 from .linedetection import line_detection
-from communication.mqtt_client import MQTTClient
+from communication.mqtt_client import MqttClient
 
 def navigate_on_autopilot(ip_addr):
     """navigate on autopilot
