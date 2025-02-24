@@ -14,6 +14,7 @@ from command.command_manager import CommandManager
 from command.moveforwardcommand import MoveForwardCommand
 from command.turnleftcommand import TurnLeftCommand
 from command.turnrightcommand import TurnRightCommand
+from command.turnaround import TurnAroundCommand
 from datetime import datetime
 
 
@@ -166,6 +167,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         
         self.graphicsView = QtWidgets.QGraphicsView(parent=self.widget_2)
+        self.graphicsView.resize(800, 600)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(2)
@@ -174,12 +176,14 @@ class Ui_MainWindow(object):
         self.graphicsView.setObjectName("graphicsView")
         self.scene = QtWidgets.QGraphicsScene()
         pixmap = QtGui.QPixmap()  # 替换为你的图片路径
-        pixmap.loadFromData()#add image input stream
-        pixmap_item = QtWidgets.QGraphicsPixmapItem(pixmap)
+        pic = open("..\\data\\lines\\1.jpg", "rb")
+        pixmap.loadFromData(QtCore.QByteArray(pic.read()))#add image input stream
+        scaled_pixmap = pixmap.scaled(self.graphicsView.size(), QtCore.Qt.AspectRatioMode.KeepAspectRatio)
+        pixmap_item = QtWidgets.QGraphicsPixmapItem(scaled_pixmap)
         self.scene.addItem(pixmap_item)
         # 将场景设置到 QGraphicsView
         self.graphicsView.setScene(self.scene)
-        
+
         self.verticalLayout_2.addWidget(self.graphicsView)
         self.textBrowser = QtWidgets.QTextBrowser(parent=self.widget_2)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
@@ -212,6 +216,7 @@ class Ui_MainWindow(object):
         self.pushButton_3.clicked.connect(self.turn_left)
         self.pushButton_6.clicked.connect(self.turn_right)
         self.pushButton_5.clicked.connect(self.move_forward)
+        self.pushButton_4.clicked.connect(self.turn_around)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -263,12 +268,17 @@ class Ui_MainWindow(object):
     def turn_right(self):
         self.command_manager.add(TurnRightCommand(self.get_mqtt_ip()))
         self.command_manager.execute()
-        self.textBrowser_2.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S\t") + "User manually turns car left.\n")
+        self.textBrowser_2.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S\t") + "User manually turns car right.\n")
     
     def move_forward(self):
         self.command_manager.add(MoveForwardCommand(self.get_mqtt_ip()))
         self.command_manager.execute()
-        self.textBrowser_2.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S\t") + "User manually turns car left.\n")
+        self.textBrowser_2.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S\t") + "User manually move car forward.\n")
+    
+    def turn_around(self):
+        self.command_manager.add(TurnAroundCommand(self.get_mqtt_ip()))
+        self.command_manager.execute()
+        self.textBrowser_2.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S\t") + "User manually turns back.\n")
 
     
 if __name__ == "__main__":
