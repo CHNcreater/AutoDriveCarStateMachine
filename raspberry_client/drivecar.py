@@ -5,11 +5,12 @@ import json
 class Drive:
     def __init__(self):
         self.wheel = Wheel()
+        self.wheel.start()
     
     def parse_message(self, message):
         data = json.loads(message)
-        action, degree = data
-        self.execute(action, degree)
+        action, degree = data["action"], data["degree"]
+        return action, degree
 
     def execute(self, action, degree):
         if action == 'left':
