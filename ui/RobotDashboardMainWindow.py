@@ -10,8 +10,15 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 import sys
 sys.path.append("..")
 from statemachine import StateMachine
+from command.command_manager import CommandManager
+from command.moveforwardcommand import MoveForwardCommand
+from command.turnleftcommand import TurnLeftCommand
+from command.turnrightcommand import TurnRightCommand
+from datetime import datetime
+
 
 class Ui_MainWindow(object):
+    command_manager = CommandManager()
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1000, 450)
@@ -202,6 +209,9 @@ class Ui_MainWindow(object):
     def events_binding(self):
         self.pushButton.clicked.connect(self.onStartPushButtonPress)
         self.communicate.log_signal.connect(self.update_log)
+        self.pushButton_3.clicked.connect(self.turn_left)
+        self.pushButton_6.clicked.connect(self.turn_right)
+        self.pushButton_5.clicked.connect(self.move_forward)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -241,6 +251,25 @@ class Ui_MainWindow(object):
 
     def update_log(self, log_message: str):
         self.textBrowser.append(log_message)
+
+    def get_mqtt_ip(self):
+        return self.lineEdit_3.text().strip().split(';')[1]
+
+    def turn_left(self):
+        self.command_manager.add(TurnLeftCommand(self.get_mqtt_ip()))
+        self.command_manager.execute()
+        self.textBrowser_2.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S\t") + "User manually turns car left.\n")
+
+    def turn_right(self):
+        self.command_manager.add(TurnRightCommand(self.get_mqtt_ip()))
+        self.command_manager.execute()
+        self.textBrowser_2.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S\t") + "User manually turns car left.\n")
+    
+    def move_forward(self):
+        self.command_manager.add(MoveForwardCommand(self.get_mqtt_ip()))
+        self.command_manager.execute()
+        self.textBrowser_2.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S\t") + "User manually turns car left.\n")
+
     
 if __name__ == "__main__":
     import sys

@@ -1,12 +1,15 @@
 import RPi.GPIO as GPIO
 from models import Wheel
+import json
 
 class Drive:
     def __init__(self):
         self.wheel = Wheel()
     
     def parse_message(self, message):
-        pass
+        data = json.loads(message)
+        action, degree = data
+        self.execute(action, degree)
 
     def execute(self, action, degree):
         if action == 'left':

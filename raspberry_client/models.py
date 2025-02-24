@@ -1,5 +1,4 @@
 import RPi.GPIO as GPIO
-import time
 
 class Wheel: 
     def __init__(self):
