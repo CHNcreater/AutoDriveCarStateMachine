@@ -10,8 +10,16 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 import sys
 sys.path.append("..")
 from statemachine import StateMachine
+from command.command_manager import CommandManager
+from command.moveforwardcommand import MoveForwardCommand
+from command.turnleftcommand import TurnLeftCommand
+from command.turnrightcommand import TurnRightCommand
+from command.turnaround import TurnAroundCommand
+from datetime import datetime
+
 
 class Ui_MainWindow(object):
+    command_manager = CommandManager()
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1000, 450)
@@ -157,13 +165,25 @@ class Ui_MainWindow(object):
         self.widget_2.setObjectName("widget_2")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.widget_2)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
+        
         self.graphicsView = QtWidgets.QGraphicsView(parent=self.widget_2)
+        self.graphicsView.resize(800, 600)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(2)
         sizePolicy.setHeightForWidth(self.graphicsView.sizePolicy().hasHeightForWidth())
         self.graphicsView.setSizePolicy(sizePolicy)
         self.graphicsView.setObjectName("graphicsView")
+        self.scene = QtWidgets.QGraphicsScene()
+        pixmap = QtGui.QPixmap()  # 替换为你的图片路径
+        pic = open("..\\data\\lines\\1.jpg", "rb")
+        pixmap.loadFromData(QtCore.QByteArray(pic.read()))#add image input stream
+        scaled_pixmap = pixmap.scaled(self.graphicsView.size(), QtCore.Qt.AspectRatioMode.KeepAspectRatio)
+        pixmap_item = QtWidgets.QGraphicsPixmapItem(scaled_pixmap)
+        self.scene.addItem(pixmap_item)
+        # 将场景设置到 QGraphicsView
+        self.graphicsView.setScene(self.scene)
+
         self.verticalLayout_2.addWidget(self.graphicsView)
         self.textBrowser = QtWidgets.QTextBrowser(parent=self.widget_2)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
@@ -193,6 +213,10 @@ class Ui_MainWindow(object):
     def events_binding(self):
         self.pushButton.clicked.connect(self.onStartPushButtonPress)
         self.communicate.log_signal.connect(self.update_log)
+        self.pushButton_3.clicked.connect(self.turn_left)
+        self.pushButton_6.clicked.connect(self.turn_right)
+        self.pushButton_5.clicked.connect(self.move_forward)
+        self.pushButton_4.clicked.connect(self.turn_around)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -201,8 +225,8 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "Target"))
         self.lineEdit.setPlaceholderText(_translate("MainWindow", "A/B/C"))
         self.lineEdit_2.setPlaceholderText(_translate("MainWindow", "1/2/3"))
-        self.label_2.setText(_translate("MainWindow", "Camera IP"))
-        self.lineEdit_3.setPlaceholderText(_translate("MainWindow", "192.168.0.0"))
+        self.label_2.setText(_translate("MainWindow", "Camera & Mosquitto IP"))
+        self.lineEdit_3.setPlaceholderText(_translate("MainWindow", "192.168.0.0;192.168.0.1"))
         self.pushButton.setText(_translate("MainWindow", "Start"))
         self.pushButton_2.setText(_translate("MainWindow", "Stop"))
         self.groupBox_2.setTitle(_translate("MainWindow", "Controller"))
@@ -214,21 +238,48 @@ class Ui_MainWindow(object):
     def onStartPushButtonPress(self):
         target_character = self.lineEdit.text().strip()
         target_number = self.lineEdit_2.text().strip()
-        target_ip_addr = self.lineEdit_3.text().strip()
+        target_camera_ip_addr, target_mosquitto_ip_addr = self.lineEdit_3.text().strip().split(";")
         if not target_character:
             print("Please input target character")
             return
         if not target_number:
             print("Please input target number")
             return
-        if not target_ip_addr:
-            print("Please input target ip address")
+        if not target_camera_ip_addr:
+            print("Please input target camera ip address")
             return
-        self.stateMachine.set_env(target1=target_character, target2=target_number, ip_addr=target_ip_addr)
+        if not target_mosquitto_ip_addr:
+            print("Please input target mosquitto ip address")
+            return
+        self.stateMachine.set_env(target1=target_character, target2=target_number, ip_addr=target_camera_ip_addr, ip_addr_mosquitto=target_mosquitto_ip_addr)
         self.stateMachine.start()
 
     def update_log(self, log_message: str):
         self.textBrowser.append(log_message)
+
+    def get_mqtt_ip(self):
+        return self.lineEdit_3.text().strip().split(';')[1]
+
+    def turn_left(self):
+        self.command_manager.add(TurnLeftCommand(self.get_mqtt_ip()))
+        self.command_manager.execute()
+        self.textBrowser_2.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S\t") + "User manually turns car left.\n")
+
+    def turn_right(self):
+        self.command_manager.add(TurnRightCommand(self.get_mqtt_ip()))
+        self.command_manager.execute()
+        self.textBrowser_2.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S\t") + "User manually turns car right.\n")
+    
+    def move_forward(self):
+        self.command_manager.add(MoveForwardCommand(self.get_mqtt_ip()))
+        self.command_manager.execute()
+        self.textBrowser_2.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S\t") + "User manually move car forward.\n")
+    
+    def turn_around(self):
+        self.command_manager.add(TurnAroundCommand(self.get_mqtt_ip()))
+        self.command_manager.execute()
+        self.textBrowser_2.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S\t") + "User manually turns back.\n")
+
     
 if __name__ == "__main__":
     import sys

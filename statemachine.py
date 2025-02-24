@@ -9,12 +9,13 @@ class StateMachine():
         self.target1 = None #target mark, such as "A/B/C"
         self.target2 = None #target mark, such as "1/2/3"
         self.ip_addr = None
+        self.mosquitto = None
         self.logger = Logger()
 
     def change_state(self, state):
         self.curState = state
 
-    def set_env(self, target1, target2, ip_addr):
+    def set_env(self, target1, target2, ip_addr, ip_addr_mosquitto):
         """set the target mark
 
         Args:
@@ -23,6 +24,7 @@ class StateMachine():
         self.target1 = target1
         self.target2 = target2
         self.ip_addr = ip_addr
+        self.mosquitto = ip_addr_mosquitto
 
     def start(self):
         """run the state machine

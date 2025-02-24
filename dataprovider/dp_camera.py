@@ -7,9 +7,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__),'..'))
 from configuration import Configuration
 
 class CameraDataProvider:
-    def __init__(self):
+    def __init__(self, ip_addr):
         self.configuration = Configuration()
-        self.server_url = self.configuration.get("camera", "server_url")
+        self.server_url = "http://" + ip_addr + self.configuration.get("camera", "server_url")
 
     def get_image(self):
         try:
@@ -34,5 +34,6 @@ class CameraDataProvider:
 
 
 # Example usage:
-# camera = CameraDataProvider()
-# camera.display_image()
+if __name__ == '__main__':
+    camera = CameraDataProvider()
+    camera.display_image()

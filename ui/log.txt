@@ -1,6 +1,0 @@
-Start State auto drive is called, target1:A, target2:1, ip_addr:1234
-Enter AutoDrivingState and Is performing auto-drive
-Enter CatchingState and Perform catching
-Start to returning back to start point
-Enter ReturningState and complete task
-Stop
