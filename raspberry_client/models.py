@@ -1,4 +1,5 @@
 import RPi.GPIO as GPIO
+import time
 
 class Wheel: 
     def __init__(self):
@@ -18,13 +19,15 @@ class Wheel:
         self.LEFT_BACK_MOTOR = None
         self.RIGHT_FRONT_MOTOR = None
         self.RIGHT_BACK_MOTOR = None
+        self.duty_cycle = 15
+        self.frequency = 100
+        self.default_duration = 3
         self.setup()
         self.setup_output()
         self.Initial_DutyCycle()
-        self.duty_cycle = 10
-        self.frequency = 100
 
     def setup(self):
+        GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.LEFT_MOTOR_FORWARD_VCC, GPIO.OUT)
         GPIO.setup(self.LEFT_MOTOR_FORWARD_GND, GPIO.OUT)
         GPIO.setup(self.LEFT_MOTOR_FORWARD_PWM, GPIO.OUT)
@@ -69,18 +72,26 @@ class Wheel:
         self.LEFT_BACK_MOTOR.ChangeDutyCycle(0)
         self.RIGHT_FRONT_MOTOR.ChangeDutyCycle(0)
         self.RIGHT_BACK_MOTOR.ChangeDutyCycle(0)
+        GPIO.output(self.LEFT_MOTOR_FORWARD_VCC, GPIO.LOW)
+        GPIO.output(self.LEFT_MOTOR_FORWARD_GND, GPIO.HIGH)
+        GPIO.output(self.LEFT_MOTOR_BACKWARD_VCC, GPIO.LOW)
+        GPIO.output(self.LEFT_MOTOR_BACKWARD_GND, GPIO.HIGH)
+        GPIO.output(self.RIGHT_MOTOR_FORWARD_VCC, GPIO.LOW)
+        GPIO.output(self.RIGHT_MOTOR_FORWARD_GND, GPIO.HIGH)
+        GPIO.output(self.RIGHT_MOTOR_BACKWARD_VCC, GPIO.LOW)
+        GPIO.output(self.RIGHT_MOTOR_BACKWARD_GND, GPIO.HIGH)
     
-    def move(self, time):
+    def move(self, duration = 3):
         """move the car, set motor's duty cycle and sleep for a while let car move for a moment
 
         Args:
-            time (int): the second of the car move
+            duration (int): the second of the car move
         """
         self.LEFT_FRONT_MOTOR.ChangeDutyCycle(self.duty_cycle)
         self.LEFT_BACK_MOTOR.ChangeDutyCycle(self.duty_cycle)
         self.RIGHT_FRONT_MOTOR.ChangeDutyCycle(self.duty_cycle)
         self.RIGHT_BACK_MOTOR.ChangeDutyCycle(self.duty_cycle)
-        time.sleep(time)
+        time.sleep(duration)
         self.stop_move()
 
     def go_straight(self):
@@ -97,7 +108,10 @@ class Wheel:
         GPIO.output(self.LEFT_MOTOR_FORWARD_GND, GPIO.LOW)
         GPIO.output(self.LEFT_MOTOR_BACKWARD_VCC, GPIO.HIGH)
         GPIO.output(self.LEFT_MOTOR_BACKWARD_GND, GPIO.LOW)
-        self.move(1)
+        if degree == 360:
+            self.move(20)
+        else:
+            self.move(self.default_duration)
 
     def turn_right(self, degree):
         """turn right
@@ -110,4 +124,4 @@ class Wheel:
         GPIO.output(self.RIGHT_MOTOR_FORWARD_GND, GPIO.LOW)
         GPIO.output(self.RIGHT_MOTOR_BACKWARD_VCC, GPIO.HIGH)
         GPIO.output(self.RIGHT_MOTOR_BACKWARD_GND, GPIO.LOW)
-        self.move(1)
+        self.move(self.default_duration)

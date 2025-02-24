@@ -5,6 +5,9 @@ from drivecar import Drive
 client = mqtt.Client()
 driver = Drive()
 
+def on_connect(client, userdata, flags, rc):
+    print("Connection returned " + str(rc))
+
 # Define the callback function for when a message is received
 def on_message(client, userdata, message):
     print(f"Received message: {message.payload.decode()} on topic {message.topic}")
@@ -12,6 +15,7 @@ def on_message(client, userdata, message):
     driver.execute(action, degree)
 
 # Set the callback function
+client.on_connect = on_connect
 client.on_message = on_message
 
 # Connect to the MQTT broker
